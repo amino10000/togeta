@@ -446,6 +446,139 @@
       vertical-align: middle;
       margin-right: 10px;
     }
+
+    /* Overlays */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(44, 34, 30, 0.95);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Coupon Ticket Styles */
+    .coupon-ticket {
+      background: var(--bg-light);
+      border-radius: 24px;
+      width: 90%;
+      max-width: 360px;
+      box-shadow: var(--shadow-lg);
+      border: 2px solid var(--accent-color);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      animation: scaleUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .coupon-header {
+      background: var(--primary-color);
+      color: var(--white);
+      padding: 16px;
+      text-align: center;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-size: 14px;
+    }
+
+    .coupon-body {
+      padding: 24px;
+      text-align: center;
+      position: relative;
+    }
+
+    .coupon-title {
+      font-size: 22px;
+      color: var(--primary-color);
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .coupon-subtitle {
+      font-size: 13px;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 24px;
+    }
+
+    .coupon-divider {
+      position: relative;
+      height: 2px;
+      border-top: 2px dashed rgba(74, 59, 50, 0.2);
+      margin: 20px 0;
+    }
+
+    .coupon-circle {
+      position: absolute;
+      top: -10px;
+      width: 20px;
+      height: 20px;
+      background: rgba(44, 34, 30, 0.95);
+      border-radius: 50%;
+    }
+
+    .coupon-circle.left {
+      left: -30px;
+    }
+
+    .coupon-circle.right {
+      right: -30px;
+    }
+
+    .coupon-timer-box {
+      background: var(--bg-cream);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(212, 175, 55, 0.25);
+    }
+
+    .timer-label {
+      font-size: 12px;
+      color: var(--text-light);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .timer-countdown {
+      font-size: 38px;
+      font-weight: 700;
+      color: var(--accent-color);
+      font-family: monospace;
+      letter-spacing: 2px;
+    }
+
+    .coupon-instructions {
+      font-size: 13px;
+      color: var(--text-dark);
+      line-height: 1.5;
+    }
+
+    .coupon-footer {
+      padding: 16px 24px 24px;
+      text-align: center;
+      background: var(--bg-cream);
+      border-top: 1px solid rgba(74, 59, 50, 0.05);
+    }
+
+    @keyframes scaleUp {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
   </style>
 </head>
 <body>
@@ -464,8 +597,7 @@
 
   <div class="container">
     <header class="brand-header">
-      <h1 class="brand-logo">Togeta<span> Coffee</span></h1>
-      <p class="brand-subtitle">CRM & Loyalty System</p>
+      <h1 class="brand-logo">Togeta <span>by K.Motors</span></h1>
     </header>
 
     <!-- ส่วนที่ 1: ฟอร์มสมัครสมาชิก (Hidden by Default) -->
@@ -524,6 +656,32 @@
           <strong>ยินดีด้วยครับ! คุณมีแต้มสะสมครบสำหรับแลกรับรางวัลแล้ว</strong>
         </p>
       </div>
+  </div>
+
+  <!-- หน้าจอคูปองจำกัดเวลา 10 นาที (10-Min Gold Coupon Ticket) -->
+  <div id="coupon-overlay" class="overlay hidden">
+    <div class="coupon-ticket">
+      <div class="coupon-header">
+        <span class="coupon-brand">Togeta by K.Motors</span>
+      </div>
+      <div class="coupon-body">
+        <h3 class="coupon-title">คูปองแลกเครื่องดื่มฟรี</h3>
+        <p class="coupon-subtitle">สะสมครบ 10 แต้ม</p>
+        <div class="coupon-divider">
+          <span class="coupon-circle left"></span>
+          <span class="coupon-circle right"></span>
+        </div>
+        <div class="coupon-timer-box">
+          <p class="timer-label">คูปองมีอายุการใช้งานอีก</p>
+          <div class="timer-countdown" id="coupon-timer">10:00</div>
+        </div>
+        <p class="coupon-instructions">กรุณาแสดงหน้าจอนี้ต่อหน้าพนักงาน<br>เพื่อแลกเครื่องดื่มฟรี 1 แก้ว</p>
+      </div>
+      <div class="coupon-footer">
+        <button onclick="closeCoupon()" class="btn btn-gold" style="font-size: 14px; padding: 12px 24px; width: 100%;">
+          ปิดหน้าต่างนี้
+        </button>
+      </div>
     </div>
   </div>
 
@@ -547,6 +705,7 @@
 
     let lastPointsVal = null;
     let pollIntervalId = null;
+    let couponTimerId = null;
 
     function logStep(msg) {
       console.log(msg);
@@ -787,6 +946,22 @@
 
     async function checkMembership() {
       if (!currentUser.userId) return;
+      
+      // ดึงเวลาหมดอายุคูปองสะสมของเครื่องนี้
+      const savedExpire = localStorage.getItem('coupon_expire_' + currentUser.userId);
+      if (savedExpire) {
+        const expireTime = parseInt(savedExpire, 10);
+        if (expireTime > Date.now()) {
+          // คูปองยังไม่หมดเวลา! เปิดหน้าจอคูปองนับถอยหลังต่อทันที
+          hideLoadingScreen();
+          showCoupon(expireTime);
+          return;
+        } else {
+          // หมดเวลาแล้ว ล้างคีย์
+          localStorage.removeItem('coupon_expire_' + currentUser.userId);
+        }
+      }
+
       logStep("6. ค้นหาข้อมูลสมาชิกบน Google Sheets...");
       
       try {
@@ -910,19 +1085,19 @@
 
     function handleRedeemReward() {
       Swal.fire({
-        title: 'ยืนยันใช้สิทธิ์ของคุณ?',
-        text: "กรุณากดยืนยันเมื่ออยู่หน้าร้านเพื่อรับสิทธิ์และแสดงต่อหน้าพนักงานเท่านั้น",
+        title: 'เปิดใช้งานคูปองของคุณ?',
+        text: "เมื่อกดยืนยันแล้ว คูปองจะมีอายุการใช้งาน 10 นาทีสำหรับแสดงหน้าร้านเพื่อรับเครื่องดื่มและหักแต้มสะสมทันที",
         icon: 'question',
         showCancelButton: true,
-        confirmButtonText: 'ยืนยันใช้สิทธิ์',
+        confirmButtonText: 'ยืนยันเปิดใช้งาน',
         cancelButtonText: 'ยกเลิก',
         confirmButtonColor: '#D4AF37',
         cancelButtonColor: '#8E7A6E'
       }).then(async (result) => {
         if (result.isConfirmed) {
           Swal.fire({
-            title: 'กำลังดำเนินการ...',
-            html: 'กำลังทำรายการหักคะแนนสะสม',
+            title: 'กำลังทำรายการ...',
+            html: 'กำลังหักคะแนนสะสมและออกตั๋วคูปอง',
             allowOutsideClick: false,
             didOpen: () => {
               Swal.showLoading();
@@ -930,24 +1105,69 @@
           });
 
           try {
-            await callApi('redeemReward', { userId: currentUser.userId });
+            const response = await callApi('redeemReward', { userId: currentUser.userId });
             Swal.close();
-            Swal.fire({
-              title: 'แลกสิทธิ์สำเร็จ!',
-              text: 'กรุณาแสดงผลหน้านี้เพื่อรับเครื่องดื่มฟรี 1 แก้ว',
-              icon: 'success',
-              confirmButtonText: 'ตกลง',
-              confirmButtonColor: '#D4AF37'
-            }).then(() => {
-              showLoadingScreen();
-              checkMembership();
-            });
+            
+            // แลกสิทธิ์สำเร็จในฐานข้อมูล!
+            // เริ่มจับเวลาคูปอง 10 นาที (600 วินาที)
+            const expireTime = Date.now() + (10 * 60 * 1000);
+            localStorage.setItem('coupon_expire_' + currentUser.userId, expireTime);
+            
+            // เปิดแสดงผลคูปอง
+            showCoupon(expireTime);
+            
+            // อัปเดตข้อมูลแต้มในหน้าหลักเป็น 0 (เพราะแต้มถูกหักไปแล้ว)
+            lastPointsVal = response.newPoints;
+            showDashboard(response.name, response.newPoints);
+
           } catch (error) {
             Swal.close();
-            showErrorAlert(error.message || "เกิดข้อผิดพลาด");
+            showErrorAlert(error.message || "เกิดข้อผิดพลาดในการแลกรางวัล");
           }
         }
       });
+    }
+
+    function showCoupon(expireTime) {
+      // หยุดการดึงโพลลิ่งแต้มชั่วคราวเพื่อประหยัดเน็ต
+      stopPointsPolling();
+      
+      document.getElementById('coupon-overlay').classList.remove('hidden');
+      
+      if (couponTimerId) clearInterval(couponTimerId);
+      
+      function updateTimer() {
+        const timeLeft = Math.max(0, Math.floor((expireTime - Date.now()) / 1000));
+        
+        if (timeLeft <= 0) {
+          clearInterval(couponTimerId);
+          couponTimerId = null;
+          closeCoupon();
+        } else {
+          const mins = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+          const secs = (timeLeft % 60).toString().padStart(2, '0');
+          document.getElementById('coupon-timer').innerText = `${mins}:${secs}`;
+        }
+      }
+      
+      updateTimer();
+      couponTimerId = setInterval(updateTimer, 1000);
+    }
+
+    function closeCoupon() {
+      if (couponTimerId) {
+        clearInterval(couponTimerId);
+        couponTimerId = null;
+      }
+      
+      document.getElementById('coupon-overlay').classList.add('hidden');
+      
+      // ลบค่าจากความจำชั่วคราว
+      localStorage.removeItem('coupon_expire_' + currentUser.userId);
+      
+      // รีโหลดหน้าจอหลัก
+      showLoadingScreen();
+      checkMembership();
     }
 
     function showLoadingScreen() {
