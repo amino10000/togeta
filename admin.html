@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>TOGETA STAFF SCANNER</title>
+  
+  <!-- html5-qrcode และ SweetAlert2 CDN -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <style>
+    /* 
+      TOGETA COFFEE - Premium CSS Design System
+      Style: Modern Minimalist & Glassmorphism 
+      Colors: Coffee Brown (#4A3B32), Gold (#D4AF37), Creamy Linen (#FDFBF7)
+    */
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap');
+
+    :root {
+      --primary-color: #4A3B32;
+      --primary-dark: #2C221E;
+      --accent-color: #D4AF37;
+      --accent-light: #F3E5AB;
+      --bg-light: #FDFBF7;
+      --bg-cream: #F5EFEB;
+      --text-dark: #3E322B;
+      --text-light: #8E7A6E;
+      --white: #FFFFFF;
+      --shadow-sm: 0 4px 6px -1px rgba(74, 59, 50, 0.05);
+      --shadow-md: 0 10px 20px -3px rgba(74, 59, 50, 0.08);
+      --shadow-lg: 0 20px 40px -5px rgba(74, 59, 50, 0.12);
+      --font-family: 'Outfit', 'Sarabun', sans-serif;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background-color: var(--bg-light);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(243, 229, 171, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(74, 59, 50, 0.05) 0px, transparent 50%);
+      background-attachment: fixed;
+      color: var(--text-dark);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 20px 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .bg-banner-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.08;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* Container & Cards */
+    .container {
+      width: 100%;
+      max-width: 450px;
+      margin: 0 auto;
+    }
+
+    .brand-header {
+      text-align: center;
+      margin-top: 10px;
+      margin-bottom: 24px;
+    }
+
+    .brand-logo {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--primary-color);
+      text-transform: uppercase;
+    }
+
+    .brand-logo span {
+      color: var(--accent-color);
+    }
+
+    .brand-subtitle {
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: var(--text-light);
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(212, 175, 55, 0.15);
+      border-radius: 24px;
+      padding: 32px 24px;
+      box-shadow: var(--shadow-lg);
+      width: 100%;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+    }
+
+    .card-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .card-subtitle {
+      font-size: 14px;
+      color: var(--text-light);
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    /* Buttons */
+    .btn {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      font-family: var(--font-family);
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: var(--white);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .btn-gold {
+      background: linear-gradient(135deg, var(--accent-color), #B5932A);
+      color: var(--white);
+      box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-gold:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+    }
+
+    .btn-gold:disabled {
+      background: #cccccc;
+      cursor: not-allowed;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+    /* Admin Scanner Styles */
+    #reader {
+      width: 100%;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 2px solid rgba(74, 59, 50, 0.1) !important;
+      box-shadow: var(--shadow-sm);
+      background: #000;
+    }
+
+    #reader__scan_region {
+      background: #000;
+    }
+
+    .admin-card {
+      text-align: center;
+    }
+
+    .scan-result-card {
+      margin-top: 20px;
+      padding: 20px;
+      background: rgba(212, 175, 55, 0.05);
+      border: 1.5px solid var(--accent-color);
+      border-radius: 16px;
+      text-align: center;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    .scan-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      color: var(--accent-color);
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    .scan-id {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--primary-color);
+      word-break: break-all;
+      margin-top: 4px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* HTML5 QR Code UI Restyling */
+    #reader button {
+      background-color: var(--primary-color) !important;
+      color: var(--white) !important;
+      border: none !important;
+      padding: 10px 20px !important;
+      border-radius: 8px !important;
+      font-family: var(--font-family) !important;
+      font-size: 14px !important;
+      font-weight: 500 !important;
+      cursor: pointer !important;
+      margin-top: 10px !important;
+      margin-bottom: 10px !important;
+      transition: var(--transition) !important;
+    }
+
+    #reader button:hover {
+      background-color: var(--primary-dark) !important;
+    }
+
+    #reader a {
+      color: var(--accent-color) !important;
+      font-size: 13px !important;
+    }
+
+    /* SweetAlert2 Styles Customization */
+    .swal2-popup {
+      border-radius: 24px !important;
+      font-family: var(--font-family) !important;
+    }
+
+    .swal2-styled.swal2-confirm {
+      background-color: var(--primary-color) !important;
+      border-radius: 10px !important;
+    }
+
+    .swal2-styled.swal2-cancel {
+      border-radius: 10px !important;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .swal-loading-icon {
+      border: 3px solid rgba(212, 175, 55, 0.2);
+      border-left-color: var(--accent-color);
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 10px;
+    }
+
+    /* Overlay & Success Styles */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(44, 34, 30, 0.95);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .overlay-content {
+      color: var(--white);
+      text-align: center;
+    }
+
+    .swal-loading-icon-large {
+      border: 4px solid rgba(212, 175, 55, 0.2);
+      border-left-color: var(--accent-color);
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+    }
+
+    .success-card {
+      background: var(--bg-light);
+      border-radius: 32px;
+      padding: 40px 32px;
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: var(--shadow-lg);
+      border: 2px solid var(--accent-color);
+      position: relative;
+      animation: scaleUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes scaleUp {
+      0% { transform: scale(0.85); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .success-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      animation: bounce 1s infinite alternate;
+      display: inline-block;
+    }
+
+    @keyframes bounce {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-10px); }
+    }
+
+    .success-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin-bottom: 8px;
+    }
+
+    .success-user-name {
+      font-size: 18px;
+      color: var(--text-dark);
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
+    .success-points-box {
+      background: var(--bg-cream);
+      border-radius: 20px;
+      padding: 16px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .success-points-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-light);
+      margin-bottom: 4px;
+    }
+
+    .success-points-num {
+      font-size: 48px;
+      font-weight: 700;
+      color: var(--accent-color);
+      line-height: 1.1;
+    }
+
+    .success-points-unit {
+      font-size: 14px;
+      color: var(--text-light);
+    }
+
+    .success-countdown {
+      font-size: 13px;
+      color: var(--text-light);
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-banner-overlay"></div>
+
+  <div class="container">
+    <header class="brand-header">
+      <h1 class="brand-logo" style="color: var(--primary-color);">Togeta<span> Staff</span></h1>
+      <p class="brand-subtitle" style="color: var(--accent-color); font-weight: 600;">เครื่องสแกนบวกแต้มหน้าร้าน</p>
+    </header>
+
+    <div class="card admin-card">
+      <h2 class="card-title" style="margin-bottom: 12px;">สแกนคิวอาร์โค้ดลูกค้า</h2>
+      <p class="card-subtitle" style="margin-bottom: 20px;">ส่องกล้องไปที่หน้าจอโทรศัพท์ของลูกค้าเพื่อสแกนสะสมแต้ม</p>
+
+      <!-- พื้นที่สำหรับกล้องสแกน -->
+      <div id="reader" style="width: 100%;"></div>
+
+      <!-- ข้อความแจ้งสถานะกล้อง -->
+      <div id="scanner-status" style="margin-top: 10px; font-size: 13px; color: var(--text-light);">
+        กำลังเชื่อมต่อกล้องหลัง...
+      </div>
+
+      <!-- ส่วนแสดงผลข้อมูลการสแกนและปุ่มดำเนินการ -->
+      <div id="scan-result-section" class="scan-result-card hidden">
+        <p class="scan-title">พบรหัสสมาชิก LINE ID</p>
+        <div class="scan-id" id="display-scanned-userid">U123456789abcdef...</div>
+        
+        <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px;">
+          <button id="btn-confirm-point" onclick="submitPoint()" class="btn btn-gold">
+            ⚡ ยืนยันเพิ่ม 1 แต้ม
+          </button>
+          
+          <button id="btn-cancel-scan" onclick="resetScanner()" class="btn btn-primary" style="background-color: var(--text-light);">
+            ยกเลิก / สแกนคิวต่อไป
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- หน้าจอประมวลผลขณะสแกน (Loading Overlay) -->
+  <div id="loading-overlay" class="overlay hidden">
+    <div class="overlay-content">
+      <div class="swal-loading-icon-large"></div>
+      <p style="margin-top: 15px; font-weight: 500;">กำลังบันทึกแต้มสะสม...</p>
+    </div>
+  </div>
+
+  <!-- หน้าจอสะสมแต้มสำเร็จ (Success Card Overlay) -->
+  <div id="success-overlay" class="overlay hidden">
+    <div class="success-card">
+      <div class="success-icon">☕</div>
+      <h3 class="success-title">สะสมแต้มสำเร็จ! 🎉</h3>
+      <p class="success-user-name" id="success-customer-name">คุณลูกค้า</p>
+      <div class="success-points-box">
+        <span class="success-points-label">แต้มสะสมใหม่</span>
+        <span class="success-points-num" id="success-customer-points">1</span>
+        <span class="success-points-unit">แต้ม</span>
+      </div>
+      <p class="success-countdown" id="success-countdown-text">เตรียมสแกนคนถัดไปใน 3 วินาที...</p>
+      <button onclick="skipResetCountdown()" class="btn btn-gold" style="margin-top: 20px; font-size: 14px; padding: 12px 24px;">
+        สแกนคนต่อไปทันที
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // ================= [ตั้งค่าโปรเจกต์ของคุณตรงนี้] =================
+    const API_URL = 'https://script.google.com/macros/s/AKfycbwxtta5Knr14FKMHvfR7eMrLaD9sJB_zDU80junFRoKyIxy71z-RhbATRXgclsfWzxESg/exec'; 
+    // =============================================================
+
+    let html5QrCode = null;
+    let scannedUserId = "";
+    let isProcessing = false;
+
+    window.onload = function() {
+      initScanner();
+    };
+
+    // ฟังก์ชันเชื่อมต่อหลังบ้าน Google Apps Script API
+    async function callApi(action, data) {
+      try {
+        const payload = JSON.stringify({ action, ...data });
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          body: payload,
+          headers: {
+            'Content-Type': 'text/plain' // หลีกเลี่ยง CORS Preflight Options บน Google
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error("ระบบล้มเหลว (HTTP Status: " + response.status + ")");
+        }
+        
+        const result = await response.json();
+        if (result.error) {
+          throw new Error(result.error);
+        }
+        return result;
+      } catch (error) {
+        console.error("API call failed:", error);
+        throw error;
+      }
+    }
+
+    function initScanner() {
+      if (typeof Html5Qrcode === 'undefined') {
+        updateStatus("ไม่สามารถโหลดระบบกล้องได้ กรุณารีเฟรชหน้าต่าง");
+        return;
+      }
+
+      html5QrCode = new Html5Qrcode("reader");
+      const config = { 
+        fps: 15, 
+        qrbox: { width: 250, height: 250 } // กำหนดขนาดกรอบคงที่เพื่อให้กล้องสแกนได้เร็วและเสถียรที่สุด
+      };
+
+      html5QrCode.start(
+        { facingMode: "environment" },
+        config,
+        onScanSuccess,
+        onScanError
+      ).then(() => {
+        updateStatus("🟢 กล้องพร้อมทำงาน - นำ QR Code จ่อหน้ากล้อง");
+      }).catch(err => {
+        console.warn("กล้องหลังขัดข้อง กำลังตรวจหากล้องตัวอื่น...", err);
+        updateStatus("🟡 กำลังสแกนหากล้องอุปกรณ์...");
+        
+        Html5Qrcode.getCameras().then(cameras => {
+          if (cameras && cameras.length > 0) {
+            html5QrCode.start(
+              cameras[0].id,
+              config,
+              onScanSuccess,
+              onScanError
+            ).then(() => {
+              updateStatus("🟢 กล้องเสริมพร้อมใช้งาน");
+            }).catch(e => {
+              updateStatus("🔴 เปิดกล้องล้มเหลว");
+              showErrorAlert("กรุณาเปิดอนุญาตสิทธิ์เข้าใช้กล้องในบราวเซอร์");
+            });
+          } else {
+            updateStatus("🔴 ไม่พบกล้องอุปกรณ์");
+            showErrorAlert("ไม่พบกล้องบนระบบเครื่องนี้");
+          }
+        }).catch(e => {
+          updateStatus("🔴 ข้อผิดพลาดกล้อง");
+          showErrorAlert("การค้นหากล้องเกิดปัญหา: " + e.message);
+        });
+      });
+    }
+
+    function onScanSuccess(decodedText, decodedResult) {
+      if (isProcessing) return;
+      
+      scannedUserId = decodedText.trim();
+      isProcessing = true;
+
+      playScanBeep();
+      
+      // ดำเนินการส่งแต้มไปบันทึกบนคลาวด์ทันทีโดยไม่ต้องคลิก (Zero-Click Auto-Submit)
+      submitPointAuto();
+    }
+
+    function onScanError(errorMessage) {
+      // ข้าม Log เพื่อไม่ให้ขยะขึ้น
+    }
+
+    let countdownInterval = null;
+
+    async function submitPointAuto() {
+      // แสดงหน้ากากประมวลผล (Loading Overlay)
+      document.getElementById('loading-overlay').classList.remove('hidden');
+      updateStatus("⏳ กำลังประมวลผลแต้มสะสม...");
+
+      try {
+        const response = await callApi('addPoint', { userId: scannedUserId });
+        
+        // เล่นเสียงยืนยันความสำเร็จ (Beep ติ๊ดๆ สองครั้งพรีเมียม)
+        playSuccessBeep();
+
+        // อัปเดตข้อมูลการ์ดแสดงความสำเร็จ (Success Card)
+        document.getElementById('success-customer-name').innerText = "คุณ " + response.name;
+        document.getElementById('success-customer-points').innerText = response.newPoints;
+        
+        // ซ่อนตัวโหลดและแสดงหน้าจอสำเร็จ
+        document.getElementById('loading-overlay').classList.add('hidden');
+        document.getElementById('success-overlay').classList.remove('hidden');
+        updateStatus("🟢 สะสมแต้มสำเร็จ!");
+
+        // เริ่มการนับถอยหลัง 3 วินาทีเพื่อรีเซ็ตกล้อง
+        startResetCountdown(3);
+
+      } catch (error) {
+        // หากล้มเหลว ให้ซ่อนตัวโหลดและปลดล็อคสถานะกล้องเพื่อรองรับการสแกนใหม่
+        document.getElementById('loading-overlay').classList.add('hidden');
+        isProcessing = false;
+        showErrorAlert(error.message || "เกิดข้อผิดพลาดในการสะสมแต้ม");
+        updateStatus("🔴 บันทึกแต้มไม่สำเร็จ กรุณาสแกนใหม่อีกครั้ง");
+      }
+    }
+
+    function startResetCountdown(seconds) {
+      let timeLeft = seconds;
+      document.getElementById('success-countdown-text').innerText = `เตรียมสแกนคนถัดไปใน ${timeLeft} วินาที...`;
+
+      countdownInterval = setInterval(() => {
+        timeLeft--;
+        if (timeLeft <= 0) {
+          clearInterval(countdownInterval);
+          resetScanner();
+        } else {
+          document.getElementById('success-countdown-text').innerText = `เตรียมสแกนคนถัดไปใน ${timeLeft} วินาที...`;
+        }
+      }, 1000);
+    }
+
+    function skipResetCountdown() {
+      if (countdownInterval) clearInterval(countdownInterval);
+      resetScanner();
+    }
+
+    function resetScanner() {
+      if (countdownInterval) clearInterval(countdownInterval);
+      
+      scannedUserId = "";
+      isProcessing = false;
+      
+      // ซ่อนหน้ากากทั้งหมด
+      document.getElementById('loading-overlay').classList.add('hidden');
+      document.getElementById('success-overlay').classList.add('hidden');
+      
+      updateStatus("🟢 กล้องพร้อมทำงาน - นำ QR Code จ่อหน้ากล้อง");
+    }
+
+    function updateStatus(text) {
+      document.getElementById('scanner-status').innerText = text;
+    }
+
+    function playScanBeep() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
+        gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + 0.08);
+      } catch (e) {
+        console.warn("Audio Context blocked", e);
+      }
+    }
+
+    function playSuccessBeep() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const now = audioCtx.currentTime;
+        
+        // เสียง ติ๊ด (สูง) -> ติ๊ด (สูงกว่า) ยืนยันผ่าน
+        const osc1 = audioCtx.createOscillator();
+        const gain1 = audioCtx.createGain();
+        osc1.connect(gain1);
+        gain1.connect(audioCtx.destination);
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(1046.50, now); // C6
+        gain1.gain.setValueAtTime(0.08, now);
+        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+        osc1.start(now);
+        osc1.stop(now + 0.1);
+
+        const osc2 = audioCtx.createOscillator();
+        const gain2 = audioCtx.createGain();
+        osc2.connect(gain2);
+        gain2.connect(audioCtx.destination);
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(1318.51, now + 0.08); // E6
+        gain2.gain.setValueAtTime(0.08, now + 0.08);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+        osc2.start(now + 0.08);
+        osc2.stop(now + 0.18);
+      } catch (e) {
+        console.warn("Audio Context blocked", e);
+      }
+    }
+
+    function showErrorAlert(message) {
+      Swal.fire({
+        title: 'เกิดข้อผิดพลาด',
+        text: message,
+        icon: 'error',
+        confirmButtonText: 'ตกลง',
+        confirmButtonColor: '#4A3B32'
+      });
+    }
+  </script>
+</body>
+</html>
