@@ -463,10 +463,6 @@
         <span class="success-points-num" id="success-customer-points">1</span>
         <span class="success-points-unit">แต้ม</span>
       </div>
-      <p class="success-countdown" id="success-countdown-text">เตรียมสแกนคนถัดไปใน 3 วินาที...</p>
-      <button onclick="skipResetCountdown()" class="btn btn-gold" style="margin-top: 20px; font-size: 14px; padding: 12px 24px;">
-        สแกนคนต่อไปทันที
-      </button>
     </div>
   </div>
 
@@ -607,24 +603,9 @@
       }
     }
 
-    function startResetCountdown(seconds) {
-      let timeLeft = seconds;
-      document.getElementById('success-countdown-text').innerText = `เตรียมสแกนคนถัดไปใน ${timeLeft} วินาที...`;
-
-      countdownInterval = setInterval(() => {
-        timeLeft--;
-        if (timeLeft <= 0) {
-          clearInterval(countdownInterval);
-          resetScanner();
-        } else {
-          document.getElementById('success-countdown-text').innerText = `เตรียมสแกนคนถัดไปใน ${timeLeft} วินาที...`;
-        }
-      }, 1000);
-    }
-
-    function skipResetCountdown() {
-      if (countdownInterval) clearInterval(countdownInterval);
-      resetScanner();
+    function startResetCountdown() {
+      // รีเซ็ตหน้าจอเพื่อเปิดกล้องพร้อมสแกนคนถัดไปโดยอัตโนมัติเงียบๆ ภายใน 3 วินาที
+      setTimeout(resetScanner, 3000);
     }
 
     function resetScanner() {
